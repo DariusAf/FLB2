@@ -19,7 +19,7 @@ function body.load()
   body.ypos = 500
 
   body.cycle_t = default_pos.t
-  body.cycle_speed = 0.8
+  body.cycle_speed = 0.7
 
   body.f1_xpos = 0
   body.f2_xpos = 0
@@ -39,8 +39,12 @@ function body.load()
   body.f2_walk_index = table.getn(f2_walk)
 
   -- TORSO variables
-  body.torso_dypos = 150
+  body.torso_dypos_base = 157
+  body.torso_dypos = 0
   body.leg_length = 165
+
+  body.torso_dr_base = 10
+  body.torso_dr = 20
 end
 
 
@@ -115,11 +119,16 @@ function body.update(dt)
   body.f2_ypos = new_f2_pos[2]
 
   -- TORSO
-  body.torso_dypos = 155 + 10 * math.sin((body.cycle_t + 0.3) * 4 * math.pi)
+  body.torso_dypos = body.torso_dypos_base + 10 * math.sin((body.cycle_t + 0.3) * 4 * math.pi)
+  body.torso_dr = body.torso_dr_base + 5 * math.sin((body.cycle_t + 0.55) * 4 * math.pi)
 end
 
 
 function body.draw(dt)
+  -- DEBUGGER
+  love.graphics.print(body.torso_dypos, 0, 30)
+  love.graphics.print(body.cycle_t, 0, 90)
+
   -- FEET
   f1_computed_x = body.xpos + body.walkcycle_xrange * body.f1_xpos
   f1_computed_y = body.ypos - body.walkcycle_yrange * body.f1_ypos
@@ -130,7 +139,7 @@ function body.draw(dt)
   --love.graphics.setColor(0, 0, 1, 1)
   --love.graphics.circle('fill', f2_computed_x, f2_computed_y, 5)
 
-  -- TORSO
+  -- LEGS
   love.graphics.setLineWidth(15)
   love.graphics.setLineStyle('smooth')
   torso_computed_x = body.xpos
@@ -147,7 +156,11 @@ function body.draw(dt)
     f2_knee_pos[1], f2_knee_pos[2],
     f2_computed_x, f2_computed_y)
 
-  -- DEBUGGER
-  love.graphics.print(body.torso_dypos, 0, 30)
-  love.graphics.print(body.cycle_t, 0, 90)
+  -- TORSO
+  love.graphics.setColor(0, 0, 1, 1)
+  love.graphics.translate(torso_computed_x, torso_computed_y)
+  love.graphics.rotate(body.torso_dr * math.pi / 180)
+  love.graphics.rectangle("fill", -20, 5, 40, -150)
+
+
 end

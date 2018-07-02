@@ -7,7 +7,7 @@ function love.load()
 
   body.load()
 
-	love.graphics.setBackgroundColor(0.1, 0.1, 0.3)
+	love.graphics.setBackgroundColor(0,0,0.1)
 end
 
 function love.draw()
