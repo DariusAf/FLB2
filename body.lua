@@ -2,7 +2,7 @@ body = {}
 
 default_pos = {t = 0.125, dx = 0, dy = 0, int = 'lin'}
 f1_walk = {
-  {t = 0.25, dx = 0.1, dy = 1, int = 'sinout'},
+  {t = 0.25, dx = 0.1, dy = 1, int = 'sinin'},
   {t = 0.5, dx = 0.4, dy = 0, int = 'sinin'},
   {t = 0.75, dx = 0, dy = 0, int = 'lin'},
   {t = 1, dx = -0.6, dy = 0, int = 'lin'},
@@ -10,7 +10,7 @@ f1_walk = {
 f2_walk = {
   {t = 0.25, dx = 0, dy = 0, int = 'lin'},
   {t = 0.5, dx = -0.6, dy = 0, int = 'lin'},
-  {t = 0.75, dx = 0.1, dy = 1, int = 'sinout'},
+  {t = 0.75, dx = 0.1, dy = 1, int = 'sinin'},
   {t = 1, dx = 0.4, dy = 0, int = 'sinin'},
 }
 
@@ -33,17 +33,19 @@ function body.load()
 
   -- WALK variables
   body.walkcycle_xrange = 150
-  body.walkcycle_yrange = 50
+  body.walkcycle_yrange = 20
 
   body.f1_walk_index = table.getn(f1_walk)
   body.f2_walk_index = table.getn(f2_walk)
 
   -- TORSO variables
   body.torso_dypos_base = 157
+  body.torso_dypos_range = 3
   body.torso_dypos = 0
   body.leg_length = 165
 
   body.torso_dr_base = 10
+  body.torso_dr_range = 2
   body.torso_dr = 20
 end
 
@@ -119,8 +121,8 @@ function body.update(dt)
   body.f2_ypos = new_f2_pos[2]
 
   -- TORSO
-  body.torso_dypos = body.torso_dypos_base + 10 * math.sin((body.cycle_t + 0.3) * 4 * math.pi)
-  body.torso_dr = body.torso_dr_base + 5 * math.sin((body.cycle_t + 0.55) * 4 * math.pi)
+  body.torso_dypos = body.torso_dypos_base + body.torso_dypos_range * math.sin((body.cycle_t + 0.35) * 4 * math.pi)
+  body.torso_dr = body.torso_dr_base + body.torso_dr_range * math.sin((body.cycle_t + 0.55) * 4 * math.pi)
 end
 
 
@@ -134,10 +136,6 @@ function body.draw(dt)
   f1_computed_y = body.ypos - body.walkcycle_yrange * body.f1_ypos
   f2_computed_x = body.xpos + body.walkcycle_xrange * body.f2_xpos
   f2_computed_y = body.ypos - body.walkcycle_yrange * body.f2_ypos
-  --love.graphics.setColor(1, 0, 0, 1)
-  --love.graphics.circle('fill', f1_computed_x, f1_computed_y, 5)
-  --love.graphics.setColor(0, 0, 1, 1)
-  --love.graphics.circle('fill', f2_computed_x, f2_computed_y, 5)
 
   -- LEGS
   love.graphics.setLineWidth(15)
