@@ -16,7 +16,7 @@ f2_walk = {
 
 function body.load()
   body.xpos = 400
-  body.ypos = 200
+  body.ypos = 500
 
   body.cycle_t = default_pos.t
   body.cycle_speed = 1
@@ -38,11 +38,10 @@ function body.load()
   body.f1_walk_index = table.getn(f1_walk)
   body.f2_walk_index = table.getn(f2_walk)
 
+  -- TORSO variables
+  body.torso_dypos = 150
 end
 
-function body.next_action()
-
-end
 
 function body.interpolate_action(last_action, next_action)
   action_duration = next_action.t - (last_action.t % 1) + 0.000001
@@ -98,6 +97,7 @@ function body.update(dt)
 end
 
 function body.draw(dt)
+  -- FEET
   love.graphics.setColor(1, 0, 0, 1)
   love.graphics.circle('fill',
       body.xpos + body.walkcycle_xrange * body.f1_xpos,
@@ -109,6 +109,21 @@ function body.draw(dt)
       body.ypos - body.walkcycle_yrange * body.f2_ypos,
       5)
 
+  -- TORSO
+  love.graphics.setLineWidth(4)
+  love.graphics.setLineStyle('smooth')
+  love.graphics.setColor(1, 0, 0, 1)
+  love.graphics.line(body.xpos,
+    body.ypos - body.torso_dypos,
+    body.xpos + body.walkcycle_xrange * body.f1_xpos,
+    body.ypos - body.walkcycle_yrange * body.f1_ypos)
+    love.graphics.setColor(0, 0, 1, 1)
+  love.graphics.line(body.xpos,
+    body.ypos - body.torso_dypos,
+    body.xpos + body.walkcycle_xrange * body.f2_xpos,
+    body.ypos - body.walkcycle_yrange * body.f2_ypos)
+
+  -- DEBUGGER
   love.graphics.print(body.f1_last_action.t, 0, 30)
   love.graphics.print(body.f1_next_action.t, 0, 60)
   love.graphics.print(body.cycle_t, 0, 90)
