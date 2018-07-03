@@ -1,59 +1,57 @@
-body = {}
+Object = require "classic"
 
-default_pos = {t = 0.125, dx = 0, dy = 0, int = 'lin'}
-f1_walk = {
-  {t = 0.25, dx = 0.1, dy = 1, int = 'sinin'},
-  {t = 0.5, dx = 0.4, dy = 0, int = 'sinin'},
-  {t = 0.75, dx = 0, dy = 0, int = 'lin'},
-  {t = 1, dx = -0.6, dy = 0, int = 'lin'},
-}
-f2_walk = {
-  {t = 0.25, dx = 0, dy = 0, int = 'lin'},
-  {t = 0.5, dx = -0.6, dy = 0, int = 'lin'},
-  {t = 0.75, dx = 0.1, dy = 1, int = 'sinin'},
-  {t = 1, dx = 0.4, dy = 0, int = 'sinin'},
-}
+BodyClass = Object:extend()
 
-function body.load()
-  body.xpos = 400
-  body.ypos = 500
+default_pos = {t = 0, dx = 0, dy = 0, int = 'lin'}
 
-  body.cycle_t = default_pos.t
-  body.cycle_speed = 0.7
+function BodyClass:new(f1_walk, f2_walk, personnality)
+  self.xpos = 400
+  self.ypos = 500
 
-  body.f1_xpos = 0
-  body.f2_xpos = 0
-  body.f1_ypos = 0
-  body.f2_ypos = 0
+  self.cycle_t = default_pos.t
+  self.cycle_speed = personnality.cycle_speed
 
-  body.f1_last_action = default_pos
-  body.f2_last_action = default_pos
-  body.f1_next_action = default_pos
-  body.f2_next_action = default_pos
+  self.f1_walk = f1_walk
+  self.f2_walk = f2_walk
+
+  -- FEET variables
+  self.f1_xpos = 0
+  self.f2_xpos = 0
+  self.f1_ypos = 0
+  self.f2_ypos = 0
+
+  self.f1_last_action = default_pos
+  self.f2_last_action = default_pos
+  self.f1_next_action = default_pos
+  self.f2_next_action = default_pos
 
   -- WALK variables
-  body.walkcycle_xrange = 150
-  body.walkcycle_yrange = 20
+  self.walkcycle_xrange = personnality.walkcycle_xrange
+  self.walkcycle_yrange = personnality.walkcycle_yrange
+  self.leg_length = personnality.leg_length
 
-  body.f1_walk_index = table.getn(f1_walk)
-  body.f2_walk_index = table.getn(f2_walk)
+  self.f1_walk_index = table.getn(f1_walk)
+  self.f2_walk_index = table.getn(f2_walk)
 
   -- TORSO variables
-  body.torso_dypos_base = 157
-  body.torso_dypos_range = 3
-  body.torso_dypos = 0
-  body.leg_length = 165
+  self.torso_dypos_base = personnality.torso_dypos_base
+  self.torso_dypos_range = personnality.torso_dypos_range
+  self.torso_dypos_phase = personnality.torso_dypos_phase
+  self.torso_dypos = 0
 
-  body.torso_dr_base = 10
-  body.torso_dr_range = 2
-  body.torso_dr = 20
+  self.torso_dr_base = personnality.torso_dr_base
+  self.torso_dr_range = personnality.torso_dr_base
+  self.torso_dr_phase = personnality.torso_dr_base
+  self.torso_dr = 20
 end
 
 
-function body.interpolate_action(last_action, next_action)
+function BodyClass:interpolate_action(last_action, next_action)
   action_duration = next_action.t - (last_action.t % 1) + 0.000001
-  action_t = body.cycle_t - (last_action.t % 1)
+  action_t = self.cycle_t - (last_action.t % 1)
   action_dt = action_t / action_duration
+
+  -- TODO : add new interpolations for natural movements, like x2in, x3out, ...
   if next_action.int == 'sin' then
     action_dt = math.sin(action_dt * math.pi - math.pi / 2) / 2 + 0.5
   elseif next_action.int == 'sinin' then
@@ -61,89 +59,93 @@ function body.interpolate_action(last_action, next_action)
   elseif next_action.int == 'sinout' then
     action_dt = 1 - math.sin(action_dt * math.pi / 2 + math.pi / 2)
   end
+
   return {last_action.dx + action_dt * (next_action.dx - last_action.dx),
           last_action.dy + action_dt * (next_action.dy - last_action.dy)}
 end
 
 
-function body.compute_knee_pos(torso_x, torso_y, foot_x, foot_y)
-  -- du bon vieux théorème de pythagore
+function BodyClass:compute_knee_pos(torso_x, torso_y, foot_x, foot_y)
+  -- TODO : ajout parametre d'offset pour faire des gens avec des grosses couilles
   mid_x = (torso_x + foot_x) / 2
   mid_y = (torso_y + foot_y) / 2
   dist = math.sqrt(math.pow((torso_x - foot_x), 2) + math.pow((torso_y - foot_y), 2))
-  if dist > body.leg_length then
+
+  -- stretch
+  if dist > self.leg_length then
     return {mid_x, mid_y}
   end
 
-  -- ajout du vecteur tourné de pi / 2
-  excentricity = math.sqrt(math.pow(body.leg_length, 2) - math.pow(dist, 2)) / 2
+  -- fold
+  excentricity = math.sqrt(math.pow(self.leg_length, 2) - math.pow(dist, 2)) / 2
   knee_x = mid_x + (foot_y - torso_y) * excentricity / dist
   knee_y = mid_y - (foot_x - torso_x) * excentricity / dist
   return {knee_x, knee_y}
 end
 
 
-function body.update(dt)
-  -- TODO : unblock movements
-  -- body.xpos = body.xpos + body.cycle_distance / body.cycle_duration * dt
+function BodyClass:update(dt)
+  -- TODO : unblock movements, baser la vitesse sur le pieds qui glisse sur le sol (dylast && dynext = 0)
+  -- self.xpos = self.xpos + self.cycle_distance / self.cycle_duration * dt
 
-  body.cycle_t = body.cycle_t + dt * body.cycle_speed
-  if body.cycle_t > 1 then
-    body.cycle_t = body.cycle_t - 1
+  self.cycle_t = self.cycle_t + dt * self.cycle_speed
+  if self.cycle_t > 1 then
+    self.cycle_t = self.cycle_t - 1
 
-    -- RESET WALKING ACTIONS
-    body.f1_last_action = body.f1_next_action
-    body.f1_walk_index = 1
-    body.f1_next_action = f1_walk[body.f1_walk_index]
-
-    body.f2_last_action = body.f2_next_action
-    body.f2_walk_index = 1
-    body.f2_next_action = f2_walk[body.f2_walk_index]
+    -- reset walk cycle
+    -- TOREFACTO
+    if self.f1_walk_index ~= 1 then
+      self.f1_last_action = self.f1_next_action
+      self.f1_walk_index = 1
+      self.f1_next_action = self.f1_walk[self.f1_walk_index]
+    end
+    if self.f2_walk_index ~= 1 then
+      self.f2_last_action = self.f2_next_action
+      self.f2_walk_index = 1
+      self.f2_next_action = self.f2_walk[self.f2_walk_index]
+    end
   end
 
-  -- TODO : refacto
-  if body.cycle_t > body.f1_next_action.t then
-    body.f1_last_action = body.f1_next_action
-    body.f1_walk_index = 1 + body.f1_walk_index % table.getn(f1_walk)
-    body.f1_next_action = f1_walk[body.f1_walk_index]
+  -- TOREFACTO
+  if self.cycle_t > self.f1_next_action.t then
+    self.f1_last_action = self.f1_next_action
+    self.f1_walk_index = 1 + self.f1_walk_index % table.getn(self.f1_walk)
+    self.f1_next_action = self.f1_walk[self.f1_walk_index]
   end
-  if body.cycle_t > body.f2_next_action.t then
-    body.f2_last_action = body.f2_next_action
-    body.f2_walk_index = 1 + body.f2_walk_index % table.getn(f2_walk)
-    body.f2_next_action = f2_walk[body.f2_walk_index]
+  if self.cycle_t > self.f2_next_action.t then
+    self.f2_last_action = self.f2_next_action
+    self.f2_walk_index = 1 + self.f2_walk_index % table.getn(self.f2_walk)
+    self.f2_next_action = self.f2_walk[self.f2_walk_index]
   end
 
-  new_f1_pos = body.interpolate_action(body.f1_last_action, body.f1_next_action)
-  body.f1_xpos = new_f1_pos[1]
-  body.f1_ypos = new_f1_pos[2]
-  new_f2_pos= body.interpolate_action(body.f2_last_action, body.f2_next_action)
-  body.f2_xpos = new_f2_pos[1]
-  body.f2_ypos = new_f2_pos[2]
+  new_f1_pos = self:interpolate_action(self.f1_last_action, self.f1_next_action)
+  self.f1_xpos = new_f1_pos[1]
+  self.f1_ypos = new_f1_pos[2]
+  new_f2_pos= self:interpolate_action(self.f2_last_action, self.f2_next_action)
+  self.f2_xpos = new_f2_pos[1]
+  self.f2_ypos = new_f2_pos[2]
 
   -- TORSO
-  body.torso_dypos = body.torso_dypos_base + body.torso_dypos_range * math.sin((body.cycle_t + 0.35) * 4 * math.pi)
-  body.torso_dr = body.torso_dr_base + body.torso_dr_range * math.sin((body.cycle_t + 0.55) * 4 * math.pi)
+  -- TODO : cycles désymétrisés avec des pics violents par exemple
+  self.torso_dypos = self.torso_dypos_base + self.torso_dypos_range * math.sin((self.cycle_t + self.torso_dypos_phase) * 4 * math.pi)
+  self.torso_dr = self.torso_dr_base + self.torso_dr_range * math.sin((self.cycle_t + self.torso_dr_phase) * 4 * math.pi)
 end
 
 
-function body.draw(dt)
-  -- DEBUGGER
-  love.graphics.print(body.torso_dypos, 0, 30)
-  love.graphics.print(body.cycle_t, 0, 90)
-
+function BodyClass:draw(dt)
   -- FEET
-  f1_computed_x = body.xpos + body.walkcycle_xrange * body.f1_xpos
-  f1_computed_y = body.ypos - body.walkcycle_yrange * body.f1_ypos
-  f2_computed_x = body.xpos + body.walkcycle_xrange * body.f2_xpos
-  f2_computed_y = body.ypos - body.walkcycle_yrange * body.f2_ypos
+  f1_computed_x = self.xpos + self.walkcycle_xrange * self.f1_xpos
+  f1_computed_y = self.ypos - self.walkcycle_yrange * self.f1_ypos
+  f2_computed_x = self.xpos + self.walkcycle_xrange * self.f2_xpos
+  f2_computed_y = self.ypos - self.walkcycle_yrange * self.f2_ypos
 
   -- LEGS
   love.graphics.setLineWidth(15)
   love.graphics.setLineStyle('smooth')
-  torso_computed_x = body.xpos
-  torso_computed_y = body.ypos - body.torso_dypos
-  f1_knee_pos = body.compute_knee_pos(torso_computed_x, torso_computed_y, f1_computed_x, f1_computed_y)
-  f2_knee_pos = body.compute_knee_pos(torso_computed_x, torso_computed_y, f2_computed_x, f2_computed_y)
+  torso_computed_x = self.xpos
+  torso_computed_y = self.ypos - self.torso_dypos
+  f1_knee_pos = self:compute_knee_pos(torso_computed_x, torso_computed_y, f1_computed_x, f1_computed_y)
+  f2_knee_pos = self:compute_knee_pos(torso_computed_x, torso_computed_y, f2_computed_x, f2_computed_y)
 
   love.graphics.setColor(1, 0, 0, 1)
   love.graphics.line(torso_computed_x, torso_computed_y,
@@ -157,8 +159,9 @@ function body.draw(dt)
   -- TORSO
   love.graphics.setColor(0, 0, 1, 1)
   love.graphics.translate(torso_computed_x, torso_computed_y)
-  love.graphics.rotate(body.torso_dr * math.pi / 180)
+  love.graphics.rotate(self.torso_dr * math.pi / 180)
   love.graphics.rectangle("fill", -20, 5, 40, -150)
-
+  love.graphics.rotate(-self.torso_dr * math.pi / 180)
+  love.graphics.translate(-torso_computed_x, -torso_computed_y)
 
 end
