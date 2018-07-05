@@ -6,14 +6,14 @@ function love.load()
   require 'body'
   require 'cycles'
 
-  floppyboy = BodyClass(confident_body.f1_walk, confident_body.f2_walk, confident_body.personnality)
+  floppyboy = BodyClass(normal_body, confident_body)
 
   love.graphics.setBackgroundColor(0,0,0.1)
 end
 
 function love.draw()
   floppyboy:draw()
-  love.graphics.print(running_body.personnality.torso_dypos_range, 0, 90)
+  love.graphics.print(floppyboy.modename, 0, 90)
 end
 
 
@@ -23,7 +23,7 @@ end
 
 
 function love.keypressed(k)
-
+  floppyboy:keypressed(k)
 end
 
 function love.keyreleased(k)

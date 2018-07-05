@@ -4,15 +4,22 @@ BodyClass = Object:extend()
 
 default_pos = {t = 0, dx = 0, dy = 0, int = 'lin'}
 
-function BodyClass:new(f1_walk, f2_walk, personnality)
+
+---------------------------------------------------------- NEW OBJECT
+
+function BodyClass:new(default_mode, confident_mode)
   self.xpos = 400
   self.ypos = 500
 
-  self.cycle_t = default_pos.t
-  self.cycle_speed = personnality.cycle_speed
+  self.modename = 'default'
+  self.default_mode = default_mode
+  self.confident_mode = confident_mode
 
-  self.f1_walk = f1_walk
-  self.f2_walk = f2_walk
+  self.cycle_t = default_pos.t
+  self.cycle_speed = self.default_mode.personnality.cycle_speed
+
+  self.f1_walk = self.default_mode.f1_walk
+  self.f2_walk = self.default_mode.f2_walk
 
   -- FEET variables
   self.f1_xpos = 0
@@ -26,25 +33,27 @@ function BodyClass:new(f1_walk, f2_walk, personnality)
   self.f2_next_action = default_pos
 
   -- WALK variables
-  self.walkcycle_xrange = personnality.walkcycle_xrange
-  self.walkcycle_yrange = personnality.walkcycle_yrange
-  self.leg_length = personnality.leg_length
+  self.walkcycle_xrange = self.default_mode.personnality.walkcycle_xrange
+  self.walkcycle_yrange = self.default_mode.personnality.walkcycle_yrange
+  self.leg_length = self.default_mode.personnality.leg_length
 
-  self.f1_walk_index = table.getn(f1_walk)
-  self.f2_walk_index = table.getn(f2_walk)
+  self.f1_walk_index = table.getn(self.default_mode.f1_walk)
+  self.f2_walk_index = table.getn(self.default_mode.f2_walk)
 
   -- TORSO variables
-  self.torso_dypos_base = personnality.torso_dypos_base
-  self.torso_dypos_range = personnality.torso_dypos_range
-  self.torso_dypos_phase = personnality.torso_dypos_phase
+  self.torso_dypos_base = self.default_mode.personnality.torso_dypos_base
+  self.torso_dypos_range = self.default_mode.personnality.torso_dypos_range
+  self.torso_dypos_phase = self.default_mode.personnality.torso_dypos_phase
   self.torso_dypos = 0
 
-  self.torso_dr_base = personnality.torso_dr_base
-  self.torso_dr_range = personnality.torso_dr_base
-  self.torso_dr_phase = personnality.torso_dr_base
+  self.torso_dr_base = self.default_mode.personnality.torso_dr_base
+  self.torso_dr_range = self.default_mode.personnality.torso_dr_base
+  self.torso_dr_phase = self.default_mode.personnality.torso_dr_base
   self.torso_dr = 20
 end
 
+
+---------------------------------------------------------- UPDATE
 
 function BodyClass:interpolate_action(last_action, next_action)
   action_duration = next_action.t - (last_action.t % 1) + 0.000001
@@ -132,6 +141,52 @@ function BodyClass:update(dt)
 end
 
 
+---------------------------------------------------------- CHANGE MODE
+
+function BodyClass:initialize_mode(mode)
+  self.cycle_speed = mode.personnality.cycle_speed
+
+  self.f1_walk = mode.f1_walk
+  self.f2_walk = mode.f2_walk
+
+  -- WALK variables
+  self.walkcycle_xrange = mode.personnality.walkcycle_xrange
+  self.walkcycle_yrange = mode.personnality.walkcycle_yrange
+  self.leg_length = mode.personnality.leg_length
+
+  -- TORSO variables
+  self.torso_dypos_base = mode.personnality.torso_dypos_base
+  self.torso_dypos_range = mode.personnality.torso_dypos_range
+  self.torso_dypos_phase = mode.personnality.torso_dypos_phase
+
+  self.torso_dr_base = mode.personnality.torso_dr_base
+  self.torso_dr_range = mode.personnality.torso_dr_base
+  self.torso_dr_phase = mode.personnality.torso_dr_base
+end
+
+
+function BodyClass:transition_mode(modename)
+  self.modename = modename
+  if modename == 'default' then
+    mode = self.default_mode
+  elseif modename == 'confident' then
+    mode = self.confident_mode
+  end
+  self:initialize_mode(mode)
+end
+
+
+function BodyClass:keypressed(k)
+  if k == 'a' then
+    self:transition_mode('default')
+  elseif k == 'z' then
+    self:transition_mode('confident')
+  end
+end
+
+
+---------------------------------------------------------- DRAW
+
 function BodyClass:draw(dt)
   -- FEET
   f1_computed_x = self.xpos + self.walkcycle_xrange * self.f1_xpos
@@ -163,5 +218,4 @@ function BodyClass:draw(dt)
   love.graphics.rectangle("fill", -20, 5, 40, -150)
   love.graphics.rotate(-self.torso_dr * math.pi / 180)
   love.graphics.translate(-torso_computed_x, -torso_computed_y)
-
 end
