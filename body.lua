@@ -150,13 +150,15 @@ end
 ---------------------------------------------------------- CHANGE MODE
 
 function BodyClass:transition_mode(modename)
-  self.modename = modename
-  if modename == 'default' then
-    mode = self.default_mode
-  elseif modename == 'confident' then
-    mode = self.confident_mode
+  if modename ~= self.modename then
+    self.modename = modename
+    if modename == 'default' then
+      mode = self.default_mode
+    elseif modename == 'confident' then
+      mode = self.confident_mode
+    end
+    self.transitioner:transition(mode)
   end
-  self.transitioner:transition(mode)
 end
 
 
