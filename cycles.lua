@@ -25,6 +25,33 @@ normal_body = {
   }
 }
 
+soft_running_body = {
+  personnality = {
+    walkcycle_xrange = 150,
+    walkcycle_yrange = 70,
+    leg_length = 165,
+    cycle_speed = 0.9,
+    torso_dypos_base = 157,
+    torso_dypos_range = 20,
+    torso_dypos_phase = 0.35,
+    torso_dr_base = 6,
+    torso_dr_range = 5,
+    torso_dr_phase = 0.35
+  },
+  f1_walk = {
+    {t = 0.25, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 0.5, dx = 0.4, dy = 0, int = 'sinout'},
+    {t = 0.75, dx = -0.2, dy = 0, int = 'lin'},
+    {t = 1, dx = -0.7, dy = 0.3, int = 'sinin'},
+  },
+  f2_walk = {
+    {t = 0.25, dx = -0.2, dy = 0, int = 'lin'},
+    {t = 0.5, dx = -0.7, dy = 0.3, int = 'sinin'},
+    {t = 0.75, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 1, dx = 0.4, dy = 0, int = 'sinout'},
+  }
+}
+
 confident_body = {
   personnality = {
     walkcycle_xrange = 200,
@@ -79,6 +106,33 @@ disco_body = {
   }
 }
 
+soft_running_body = {
+  personnality = {
+    walkcycle_xrange = 150,
+    walkcycle_yrange = 70,
+    leg_length = 165,
+    cycle_speed = 0.8,
+    torso_dypos_base = 157,
+    torso_dypos_range = 20,
+    torso_dypos_phase = 0.35,
+    torso_dr_base = 6,
+    torso_dr_range = 5,
+    torso_dr_phase = 0.35
+  },
+  f1_walk = {
+    {t = 0.25, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 0.5, dx = 0.4, dy = 0, int = 'sinout'},
+    {t = 0.75, dx = -0.2, dy = 0, int = 'lin'},
+    {t = 1, dx = -0.7, dy = 0.3, int = 'sinin'},
+  },
+  f2_walk = {
+    {t = 0.25, dx = -0.2, dy = 0, int = 'lin'},
+    {t = 0.5, dx = -0.7, dy = 0.3, int = 'sinin'},
+    {t = 0.75, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 1, dx = 0.4, dy = 0, int = 'sinout'},
+  }
+}
+
 running_body = {
   personnality = {
     walkcycle_xrange = 150,
@@ -87,22 +141,22 @@ running_body = {
     cycle_speed = 0.9,
     torso_dypos_base = 157,
     torso_dypos_range = 25,
-    torso_dypos_phase = 0.55,
+    torso_dypos_phase = 0.3,
     torso_dr_base = 10,
     torso_dr_range = 8,
-    torso_dr_phase = 0.35
+    torso_dr_phase = 0.1
   },
   f1_walk = {
-    {t = 0.25, dx = 0.4, dy = 0, int = 'sinout'},
-    {t = 0.5, dx = -0.5, dy = 0, int = 'lin'},
-    {t = 0.75, dx = -0.7, dy = 0.8, int = 'sinin'},
-    {t = 1.0, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 0.25, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 0.5, dx = 0.4, dy = 0, int = 'sinout'},
+    {t = 0.75, dx = -0.5, dy = 0, int = 'lin'},
+    {t = 1, dx = -0.7, dy = 0.8, int = 'sinin'},
   },
   f2_walk = {
-    {t = 0.25, dx = -0.7, dy = 0.8, int = 'sinin'},
-    {t = 0.5, dx = 0, dy = 0.5, int = 'lin'},
-    {t = 0.75, dx = 0.4, dy = 0, int = 'sinout'},
-    {t = 1.0, dx = -0.5, dy = 0, int = 'lin'},
+    {t = 0.25, dx = -0.5, dy = 0, int = 'lin'},
+    {t = 0.5, dx = -0.7, dy = 0.8, int = 'sinin'},
+    {t = 0.75, dx = 0, dy = 0.5, int = 'lin'},
+    {t = 1, dx = 0.4, dy = 0, int = 'sinout'},
   }
 }
 

@@ -6,7 +6,12 @@ function love.load()
   require 'body'
   require 'cycles'
 
-  floppyboy = BodyClass(normal_body, confident_body)
+  modes = {
+    default = normal_body,
+    mid_run = soft_running_body,
+    run = running_body
+ }
+  floppyboy = BodyClass(modes)
 
   love.graphics.setBackgroundColor(0,0,0.1)
 end

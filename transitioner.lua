@@ -42,7 +42,7 @@ end
 function TransitionerClass:update(dt, parent)
   if self.is_transitioning then
     self.transition_t = self.transition_t + dt
-
+    
     parent.cycle_speed = self:personnality('cycle_speed')
 
     parent.walkcycle_xrange = self:personnality('walkcycle_xrange')

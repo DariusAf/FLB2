@@ -8,20 +8,19 @@ default_pos = {t = 0, dx = 0, dy = 0, int = 'lin'}
 
 ---------------------------------------------------------- NEW OBJECT
 
-function BodyClass:new(default_mode, confident_mode)
+function BodyClass:new(modes)
   self.xpos = 400
   self.ypos = 500
 
   self.modename = 'default'
-  self.transitioner = TransitionerClass(default_mode)
-  self.default_mode = default_mode
-  self.confident_mode = confident_mode
+  self.transitioner = TransitionerClass(modes.default)
+  self.modes = modes
 
   self.cycle_t = default_pos.t
   self.cycle_speed = 1
 
-  self.f1_walk = self.default_mode.f1_walk -- TODO : to transition
-  self.f2_walk = self.default_mode.f2_walk
+  self.f1_walk = modes.default.f1_walk
+  self.f2_walk = modes.default.f2_walk
 
   -- FEET variables
   self.f1_xpos = 0
@@ -39,8 +38,8 @@ function BodyClass:new(default_mode, confident_mode)
   self.walkcycle_yrange = 50
   self.leg_length = 150
 
-  self.f1_walk_index = table.getn(self.default_mode.f1_walk)
-  self.f2_walk_index = table.getn(self.default_mode.f2_walk)
+  self.f1_walk_index = table.getn(modes.default.f1_walk)
+  self.f2_walk_index = table.getn(modes.default.f2_walk)
 
   -- TORSO variables
   self.torso_dypos_base = 0
@@ -152,12 +151,7 @@ end
 function BodyClass:transition_mode(modename)
   if modename ~= self.modename then
     self.modename = modename
-    if modename == 'default' then
-      mode = self.default_mode
-    elseif modename == 'confident' then
-      mode = self.confident_mode
-    end
-    self.transitioner:transition(mode)
+    self.transitioner:transition(self.modes[modename])
   end
 end
 
@@ -166,7 +160,9 @@ function BodyClass:keypressed(k)
   if k == 'a' then
     self:transition_mode('default')
   elseif k == 'z' then
-    self:transition_mode('confident')
+    self:transition_mode('mid_run')
+  elseif k == 'e' then
+    self:transition_mode('run')
   end
 end
 
