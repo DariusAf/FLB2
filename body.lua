@@ -1,4 +1,5 @@
 Object = require "classic"
+require "transitioner"
 
 BodyClass = Object:extend()
 
@@ -12,13 +13,14 @@ function BodyClass:new(default_mode, confident_mode)
   self.ypos = 500
 
   self.modename = 'default'
+  self.transitioner = TransitionerClass(default_mode)
   self.default_mode = default_mode
   self.confident_mode = confident_mode
 
   self.cycle_t = default_pos.t
-  self.cycle_speed = self.default_mode.personnality.cycle_speed
+  self.cycle_speed = 1
 
-  self.f1_walk = self.default_mode.f1_walk
+  self.f1_walk = self.default_mode.f1_walk -- TODO : to transition
   self.f2_walk = self.default_mode.f2_walk
 
   -- FEET variables
@@ -33,22 +35,22 @@ function BodyClass:new(default_mode, confident_mode)
   self.f2_next_action = default_pos
 
   -- WALK variables
-  self.walkcycle_xrange = self.default_mode.personnality.walkcycle_xrange
-  self.walkcycle_yrange = self.default_mode.personnality.walkcycle_yrange
-  self.leg_length = self.default_mode.personnality.leg_length
+  self.walkcycle_xrange = 100
+  self.walkcycle_yrange = 50
+  self.leg_length = 150
 
   self.f1_walk_index = table.getn(self.default_mode.f1_walk)
   self.f2_walk_index = table.getn(self.default_mode.f2_walk)
 
   -- TORSO variables
-  self.torso_dypos_base = self.default_mode.personnality.torso_dypos_base
-  self.torso_dypos_range = self.default_mode.personnality.torso_dypos_range
-  self.torso_dypos_phase = self.default_mode.personnality.torso_dypos_phase
+  self.torso_dypos_base = 0
+  self.torso_dypos_range = 5
+  self.torso_dypos_phase = 0
   self.torso_dypos = 0
 
-  self.torso_dr_base = self.default_mode.personnality.torso_dr_base
-  self.torso_dr_range = self.default_mode.personnality.torso_dr_base
-  self.torso_dr_phase = self.default_mode.personnality.torso_dr_base
+  self.torso_dr_base = 0
+  self.torso_dr_range = 5
+  self.torso_dr_phase = 0
   self.torso_dr = 20
 end
 
@@ -94,6 +96,11 @@ end
 
 
 function BodyClass:update(dt)
+  --- UPDATE EVERY CONST
+  self.transitioner:update(dt, self)
+
+  --- COMPUTE MOVEMENT
+
   -- TODO : unblock movements, baser la vitesse sur le pieds qui glisse sur le sol (dylast && dynext = 0)
   -- self.xpos = self.xpos + self.cycle_distance / self.cycle_duration * dt
 
@@ -134,7 +141,6 @@ function BodyClass:update(dt)
   self.f2_xpos = new_f2_pos[1]
   self.f2_ypos = new_f2_pos[2]
 
-  -- TORSO
   -- TODO : cycles désymétrisés avec des pics violents par exemple
   self.torso_dypos = self.torso_dypos_base + self.torso_dypos_range * math.sin((self.cycle_t + self.torso_dypos_phase) * 4 * math.pi)
   self.torso_dr = self.torso_dr_base + self.torso_dr_range * math.sin((self.cycle_t + self.torso_dr_phase) * 4 * math.pi)
@@ -143,28 +149,6 @@ end
 
 ---------------------------------------------------------- CHANGE MODE
 
-function BodyClass:initialize_mode(mode)
-  self.cycle_speed = mode.personnality.cycle_speed
-
-  self.f1_walk = mode.f1_walk
-  self.f2_walk = mode.f2_walk
-
-  -- WALK variables
-  self.walkcycle_xrange = mode.personnality.walkcycle_xrange
-  self.walkcycle_yrange = mode.personnality.walkcycle_yrange
-  self.leg_length = mode.personnality.leg_length
-
-  -- TORSO variables
-  self.torso_dypos_base = mode.personnality.torso_dypos_base
-  self.torso_dypos_range = mode.personnality.torso_dypos_range
-  self.torso_dypos_phase = mode.personnality.torso_dypos_phase
-
-  self.torso_dr_base = mode.personnality.torso_dr_base
-  self.torso_dr_range = mode.personnality.torso_dr_base
-  self.torso_dr_phase = mode.personnality.torso_dr_base
-end
-
-
 function BodyClass:transition_mode(modename)
   self.modename = modename
   if modename == 'default' then
@@ -172,7 +156,7 @@ function BodyClass:transition_mode(modename)
   elseif modename == 'confident' then
     mode = self.confident_mode
   end
-  self:initialize_mode(mode)
+  self.transitioner:transition(mode)
 end
 
 

@@ -13,7 +13,8 @@ end
 
 function love.draw()
   floppyboy:draw()
-  love.graphics.print(floppyboy.modename, 0, 90)
+  love.graphics.print(tostring(floppyboy.transitioner.transition_t), 0, 60)
+  love.graphics.print(tostring(floppyboy.transitioner.is_transitioning), 0, 90)
 end
 
 
