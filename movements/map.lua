@@ -22,14 +22,15 @@ function MapClass:out_data(controller_in_data)
   floor_y = math.huge
   for i = 1, (self.vec_n - 1) do
     if (self.vec[i].x <= cx) and (cx <= self.vec[i + 1].x) then
-      fy = self.vec[i].y +
-          (self.vec[i + 1].y - self.vec[i].y) *
-          (cx - self.vec[i].x) / (self.vec[i + 1].x - self.vec[i].x)
-      floor_y = math.min(fy, floor_y)
+      Dx = self.vec[i + 1].x - self.vec[i].x
+      Dy = self.vec[i + 1].y - self.vec[i].y
+      floor_th = Dy / Dx -- ce genre d'angle mamène, atan() n'apporte rien
+      floor_y = math.min(self.vec[i].y + (cx - self.vec[i].x) * floor_th,
+                         floor_y)
     end
   end
 
-  return {floor_y = floor_y}
+  return {floor_y = floor_y, floor_th = floor_th}
 end
 
 function MapClass:draw()

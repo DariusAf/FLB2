@@ -18,19 +18,23 @@ end
 function love.draw()
   controller:draw()
   map:draw()
+  love.graphics.print(controller.state, 10, 10)
+  love.graphics.print(controller.active_key, 10, 40)
+  love.graphics.print(map:out_data(controller:in_data()).floor_th, 10, 70)
 end
 
 
 function love.update(dt)
-  controller:update(dt)
-  controller:update_state(map:out_data(controller:in_data()))
+  map_link_data = map:out_data(controller:in_data())
+  controller:update(dt, map_link_data)
+  controller:update_state(map_link_data)
 end
 
 
 function love.keypressed(k)
-
+  controller:keypressed(k)
 end
 
 function love.keyreleased(k)
-
+  controller:keyreleased(k)
 end
