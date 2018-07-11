@@ -22,7 +22,8 @@ end
 
 
 function love.update(dt)
-
+  controller:update(dt)
+  controller:update_state(map:out_data(controller:in_data()))
 end
 
 
