@@ -20,14 +20,13 @@ function love.draw()
   map:draw()
   love.graphics.print(controller.state, 10, 10)
   love.graphics.print(controller.active_key, 10, 40)
-  love.graphics.print(map:out_data(controller:in_data()).floor_th, 10, 70)
+  love.graphics.print(controller.floor_angle_ratio, 10, 70)
 end
 
 
 function love.update(dt)
-  map_link_data = map:out_data(controller:in_data())
-  controller:update(dt, map_link_data)
-  controller:update_state(map_link_data)
+  controller:update(dt)
+  correct_movement_and_update_state(controller, map)
 end
 
 

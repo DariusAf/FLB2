@@ -5,7 +5,8 @@ MapClass = Object:extend()
 function MapClass:new(vec_map)
   self.vec = vec_map
   self.vec_n = table.getn(self.vec)
-  self.line_vec = self:convert_vec_to_line(self.vec)
+  self.vec_line = self:convert_vec_to_line(self.vec)
+  self.vec_data = self:compute_vec_data(self.vec)
 end
 
 function MapClass:convert_vec_to_line(vec)
@@ -17,23 +18,44 @@ function MapClass:convert_vec_to_line(vec)
   return line
 end
 
-function MapClass:out_data(controller_in_data)
-  cx = controller_in_data.x
-  floor_y = math.huge
+function MapClass:compute_vec_data(vec)
+  data = {}
   for i = 1, (self.vec_n - 1) do
-    if (self.vec[i].x <= cx) and (cx <= self.vec[i + 1].x) then
-      Dx = self.vec[i + 1].x - self.vec[i].x
-      Dy = self.vec[i + 1].y - self.vec[i].y
-      floor_th = Dy / Dx -- ce genre d'angle mamène, atan() n'apporte rien
-      floor_y = math.min(self.vec[i].y + (cx - self.vec[i].x) * floor_th,
-                         floor_y)
+    xm = (self.vec[i].x + self.vec[i + 1].x) / 2
+    ym = (self.vec[i].y + self.vec[i + 1].y) / 2
+    Dx = self.vec[i + 1].x - self.vec[i].x
+    Dy = self.vec[i + 1].y - self.vec[i].y
+    if (math.abs(Dx) >= math.abs(Dy)) then
+      angle_ratio = Dy / Dx
+      orientation = '-'
+      if Dx > 0 then
+        normal_dir = -1
+      else
+        normal_dir = 1
+      end
+    else
+      angle_ratio = Dx / Dy
+      orientation = '|'
+      if Dy > 0 then
+        normal_dir = 1
+      else
+        normal_dir = -1
+      end
     end
+    table.insert(data,
+    { xm = xm,
+      ym = ym,
+      Dx = math.abs(Dx),
+      Dy = math.abs(Dy),
+      angle_ratio = angle_ratio,
+      orientation = orientation,
+      normal_dir = normal_dir
+    })
   end
-
-  return {floor_y = floor_y, floor_th = floor_th}
+  return data
 end
 
 function MapClass:draw()
   love.graphics.setColor(0, 0, 1)
-  love.graphics.line(self.line_vec)
+  love.graphics.line(self.vec_line)
 end
