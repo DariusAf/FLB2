@@ -57,7 +57,7 @@ end
 
 function MapClass:draw(camera)
   love.graphics.setColor(0, 0, 1)
-  love.graphics.translate(-camera.x, -camera.y)
+  love.graphics.translate(-camera.x * scale, -camera.y * scale)
   love.graphics.line(self.vec_line)
-  love.graphics.translate(camera.x, camera.y)
+  love.graphics.translate(camera.x * scale, camera.y * scale)
 end

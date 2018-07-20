@@ -30,7 +30,7 @@ end
 function love.update(dt)
   controller:update(dt)
   correct_movement_and_update_state(controller, map)
-  camera:update(controller.x * scale, controller.y * scale)
+  camera:update(controller.x, controller.y)
 end
 
 

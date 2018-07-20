@@ -3,9 +3,9 @@ Object = require "classic"
 CameraClass = Object:extend()
 
 view_params = {
-  length = 800,
-  width = 600,
-  dead_zone = 100,
+  length = 400,
+  width = 300,
+  dead_zone = 50,
 }
 
 function CameraClass:new(params)

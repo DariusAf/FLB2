@@ -2,6 +2,7 @@ Object = require "classic"
 
 ControllerClass = Object:extend()
 
+snap_continuity_tolerance = 10
 collision_tolerance = 20
 gravity_acc = 1000
 lateral_acc = 1000
@@ -67,7 +68,7 @@ end
 
 function ControllerClass:draw(camera)
   love.graphics.setColor(1, 0, 0)
-  love.graphics.circle("fill", self.x * scale - camera.x, self.y * scale - 20 - camera.y, 20, 10)
+  love.graphics.circle("fill", (self.x - camera.x) * scale, (self.y - 10 - camera.y) * scale, 10 * scale, 10)
 end
 
 function ControllerClass:keypressed(k)
@@ -91,6 +92,7 @@ end
 
 
 function correct_movement_and_update_state(controller, map)
+  last_state = controller.state
   cx = controller.x
   cy = controller.y
   collides = false
@@ -103,28 +105,31 @@ function correct_movement_and_update_state(controller, map)
 
       if (map.vec_data[i].orientation == "-")
           and (math.abs(map.vec_data[i].xm - cx) < (math.abs(map.vec_data[i].Dx) / 2 + 1))
-          and ((cy - rectified_horizontal_pos) * map.vec_data[i].normal_dir <= 0) then
-        collides = true
-        controller.y = rectified_horizontal_pos
-        cy = controller.y
-        controller.dy = 0
-        controller.state = "snap"
-        controller.floor_angle_ratio = map.vec_data[i].angle_ratio
-        -- TODO : ajouter un temps de réception après un atterissage
+          and ( ((cy - rectified_horizontal_pos) * map.vec_data[i].normal_dir <= 0)
+            or ( (last_state == "snap") and (map.vec_data[i].normal_dir < 0)
+              and ((rectified_horizontal_pos - cy) < snap_continuity_tolerance))
+          ) then
+          collides = true
+          controller.y = rectified_horizontal_pos
+          cy = controller.y -- update for multiple collision
+          controller.dy = 0
+          controller.state = "snap"
+          controller.floor_angle_ratio = map.vec_data[i].angle_ratio
+          -- TODO : ajouter un temps de récupération après un atterissage
 
       elseif (map.vec_data[i].orientation == "|")
           and (math.abs(map.vec_data[i].ym + collision_tolerance - cy) < (math.abs(map.vec_data[i].Dy) / 2 + collision_tolerance))
           and ((cx - rectified_vertical_pos) * map.vec_data[i].normal_dir <= 0) then
         controller.x = rectified_vertical_pos
-        cx = controller.x
-        if (controller.state == "fall") then
+        cx = controller.x -- update for multiple collision
+        if (last_state == "fall") then
           controller.dy = controller.dy / 5
         end
         if not collides then
           controller.state = "slide"
           controller.floor_angle_ratio = map.vec_data[i].angle_ratio
+          collides = true
         end
-        collides = true
       end
 
     end
