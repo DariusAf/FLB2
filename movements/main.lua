@@ -23,6 +23,7 @@ function love.draw()
   love.graphics.print(controller.state, 10, 10)
   love.graphics.print(controller.active_key, 10, 40)
   love.graphics.print(controller.floor_angle_ratio, 10, 70)
+  love.graphics.print(controller.dx, 10, 100)
 end
 
 

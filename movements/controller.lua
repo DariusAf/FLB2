@@ -4,7 +4,7 @@ ControllerClass = Object:extend()
 
 collision_tolerance = 20
 gravity_acc = 1000
-lateral_acc = 500
+lateral_acc = 1000
 
 LEFT_KEY = 'left'
 RIGHT_KEY = 'right'
@@ -31,39 +31,38 @@ function ControllerClass:update(dt)
   elseif self.active_key == RIGHT_KEY then
     dir = 1
   end
+  sdx = 0
+  if self.dx > 0 then
+    sdx = 1
+  elseif self.dx < 0 then
+    sdx = -1
+  end
 
   if self.state == "fall" then
+    self.dx = self.dx + dt * lateral_acc / 4 * dir
     self.dy = self.dy + dt * gravity_acc
-    self.dx = self.dx + dt * lateral_acc * dir
-    self.y = self.y + self.dy * dt
-    self.x = self.x + self.dx * dt
 
   elseif self.state == "slide" then
-    floor_dir = 1
-    if self.floor_angle_ratio < 0 then
-      floor_dir = -1
-    end
-    -- TODO : improve that crap jump
-    if (dir == floor_dir) then
-      self.dx = floor_dir * self.maxdx / 2
-      self.dy = -self.maxdy
-    elseif (dir == -floor_dir) then
-      self.dx = floor_dir * self.maxdx / 3
-      self.dy = -self.maxdy / 2
-    else
-      floor_angle_norm = math.sqrt(1 + math.pow(self.floor_angle_ratio, 2))
-      self.dy = self.dy + dt * gravity_acc / floor_angle_norm
-      self.dx = floor_dir * self.floor_angle_ratio * self.dy - 1
-    end
-    self.y = self.y + self.dy * dt
-    self.x = self.x + self.dx * dt
+    floor_angle_norm = math.sqrt(1 + math.pow(self.floor_angle_ratio, 2))
+    self.dy = self.dy + dt * gravity_acc / floor_angle_norm
+    self.dx = self.floor_angle_ratio * (self.dy - 1)
 
   elseif self.state == "snap" then
-    delta_x = dir * self.maxdx
-    self.x = self.x + delta_x * dt
-    delta_y = self.floor_angle_ratio * delta_x + 1
-    self.y = self.y + (delta_y * dt)
+    if (dir == 0) or (math.abs(self.dx) > self.maxdx) or (dir == -sdx) then
+      if self.dx > 0 then
+        self.dx = math.max(self.dx - dt * lateral_acc * 3, 0)
+      else
+        self.dx = math.min(self.dx + dt * lateral_acc * 3, 0)
+      end
+    else
+      self.dx = math.max(math.min(self.dx + dt * dir * lateral_acc, self.maxdx), -self.maxdx)
+    end
+    self.dy = self.floor_angle_ratio * self.dx + 1
   end
+
+  self.y = self.y + self.dy * dt
+  self.x = self.x + self.dx * dt
+
 end
 
 function ControllerClass:draw(camera)
