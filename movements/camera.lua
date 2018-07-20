@@ -26,7 +26,7 @@ function CameraClass:new(params)
 end
 
 function CameraClass:update(dt, targetX, targetY)
-  if self.mode == 'track' then
+  if (self.mode == 'track') or (math.abs(targetX - self.L / 2 - self.x) > self.L/2) then
     dx = targetX - (self.x + self.L / 2)
     dy = targetY - (self.y + self.H / 2)
     if dx > self.params.dead_zone then
@@ -34,11 +34,16 @@ function CameraClass:update(dt, targetX, targetY)
     elseif dx < -self.params.dead_zone then
       self.x = targetX + self.params.dead_zone - self.L / 2
     end
+    self.dx = 0
+    self.dy = 0
 
   elseif self.mode == 'elastic' then
-    K = 50
-    self.dx = self.dx + dt * (K * (targetX - self.L / 2 - self.x) - K / 5 * self.dx)
-    self.x = self.x + dt * self.dx
+    K = 2
+    Kdamp = 3600 / 250
+    dl = (targetX - self.L / 2 - self.x)
+    dl = dl * math.abs(dl)
+    self.dx = self.dx + dt * math.min(math.max((K * dl - K * Kdamp * self.dx), -1000), 1000)
+    self.x = self.x + dt * math.min(math.max(self.dx, -1000), 1000)
     self.y = self.y + dt * self.dy
   end
 end
