@@ -8,16 +8,18 @@ function love.load()
   require "controller"
   require "vec_map"
   require "map"
+  require "camera"
 
   controller = ControllerClass()
-  map = MapClass(vec_cuvette)
+  map = MapClass(vec_land)
+  camera = CameraClass(view_params)
 
   love.graphics.setBackgroundColor(0,0,0.1)
 end
 
 function love.draw()
-  controller:draw()
-  map:draw()
+  controller:draw(camera:position())
+  map:draw(camera:position())
   love.graphics.print(controller.state, 10, 10)
   love.graphics.print(controller.active_key, 10, 40)
   love.graphics.print(controller.floor_angle_ratio, 10, 70)
@@ -27,6 +29,7 @@ end
 function love.update(dt)
   controller:update(dt)
   correct_movement_and_update_state(controller, map)
+  camera:update(controller.x * scale, controller.y * scale)
 end
 
 

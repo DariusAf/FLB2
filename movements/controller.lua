@@ -37,17 +37,17 @@ function ControllerClass:update(dt)
     self.dx = self.dx + dt * lateral_acc * dir
     self.y = self.y + self.dy * dt
     self.x = self.x + self.dx * dt
+
   elseif self.state == "slide" then
     floor_dir = 1
     if self.floor_angle_ratio < 0 then
       floor_dir = -1
     end
+    -- TODO : improve that crap jump
     if (dir == floor_dir) then
-      -- TODO : improve that crap jump
       self.dx = floor_dir * self.maxdx / 2
       self.dy = -self.maxdy
     elseif (dir == -floor_dir) then
-      -- TODO : improve that crap jump
       self.dx = floor_dir * self.maxdx / 3
       self.dy = -self.maxdy / 2
     else
@@ -57,6 +57,7 @@ function ControllerClass:update(dt)
     end
     self.y = self.y + self.dy * dt
     self.x = self.x + self.dx * dt
+
   elseif self.state == "snap" then
     delta_x = dir * self.maxdx
     self.x = self.x + delta_x * dt
@@ -65,14 +66,13 @@ function ControllerClass:update(dt)
   end
 end
 
-function ControllerClass:draw(dt)
+function ControllerClass:draw(camera)
   love.graphics.setColor(1, 0, 0)
-  love.graphics.circle("fill", self.x * scale, self.y * scale - 20, 20, 10)
+  love.graphics.circle("fill", self.x * scale - camera.x, self.y * scale - 20 - camera.y, 20, 10)
 end
 
 function ControllerClass:keypressed(k)
   if (k == LEFT_KEY) or (k == RIGHT_KEY) then
-    -- TODO : only if key is a movement key !
     self.active_key = k
   end
 
@@ -112,6 +112,7 @@ function correct_movement_and_update_state(controller, map)
         controller.state = "snap"
         controller.floor_angle_ratio = map.vec_data[i].angle_ratio
         -- TODO : ajouter un temps de réception après un atterissage
+
       elseif (map.vec_data[i].orientation == "|")
           and (math.abs(map.vec_data[i].ym + collision_tolerance - cy) < (math.abs(map.vec_data[i].Dy) / 2 + collision_tolerance))
           and ((cx - rectified_vertical_pos) * map.vec_data[i].normal_dir <= 0) then

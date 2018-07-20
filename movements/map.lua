@@ -55,7 +55,9 @@ function MapClass:compute_vec_data(vec)
   return data
 end
 
-function MapClass:draw()
+function MapClass:draw(camera)
   love.graphics.setColor(0, 0, 1)
+  love.graphics.translate(-camera.x, -camera.y)
   love.graphics.line(self.vec_line)
+  love.graphics.translate(camera.x, camera.y)
 end
